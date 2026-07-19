@@ -1,36 +1,59 @@
-# mapa-discos
+# mapa-discos 🪩
 
-Top-down nightclub venue maps: a visual **builder** for drawing a club layout with pricing
-tiers, and a standalone, dependency-free **viewer** you embed in a ticketing site.
+Mapas cenitales de discotecas y venues nocturnos: un **builder** visual para dibujar el layout
+del club con sus tiers de precio, y un **viewer** embebible, sin dependencias, para tu sitio de
+venta de entradas.
 
-One plain JSON document (`venue.json`, spec in [`schema.md`](./schema.md)) fully describes a
-venue. The builder is a convenience for producing that JSON; the viewer is a renderer for it.
-You can hand-write the JSON in any editor and get a working map — the GUI is never required.
+Todo el venue vive en **un solo archivo JSON** (`venue.json`, contrato en
+[`schema.md`](./schema.md)). El builder es una comodidad para producir ese JSON; el viewer es un
+renderer del mismo. Podés escribir el JSON a mano en cualquier editor y obtener un mapa
+funcional — la GUI nunca es obligatoria.
+
+| Viewer (embebido en tu sitio) | Builder (editor visual) |
+|---|---|
+| ![Viewer: mapa oscuro con leyenda de tiers y precios en CLP](./docs/viewer.png) | ![Builder: canvas con mesas, cabañas y panel de propiedades](./docs/builder.png) |
+
+## Cómo funciona
+
+```
+builder ──produce──▶  venue.json  ◀──lo escribís a mano si querés
+                          │
+viewer ◀──renderiza───────┘        tu sitio escucha eventos `select` y arma el carrito
+```
+
+- **Zonas**: áreas de pie (pista, general), mesas VIP (se venden como unidad), fixtures
+  (barra, DJ, escenario, baños…) y paredes. Rectángulos (con rotación), círculos y polígonos.
+- **Tiers**: el precio vive en el tier (`precio + cargo por servicio`), las zonas apuntan a un
+  tier. Leyenda con precios formateados vía `Intl.NumberFormat` — por defecto `es-CL` + CLP
+  (`$ 250.000`).
+- **Estados por zona**: `available` / `limited` / `soldout` / `reserved`, cambiables en vivo
+  desde tu código (`map.setStatus('vip-a', 'soldout')`).
+- **Multi-piso**, tooltips, pan/zoom, tema dark/light, accesible por teclado y lector de pantalla.
 
 ## Quickstart
 
 ```sh
-npm install          # esbuild only (dev tool; the viewer has zero runtime deps)
-npm run check        # validate examples + geometry self-checks
-npm run build        # bundle the viewer into dist/
-npm run serve        # static server on http://127.0.0.1:8123
+npm install          # solo esbuild (herramienta de dev; el viewer no tiene deps en runtime)
+npm run check        # valida los ejemplos + self-checks de geometría
+npm run build        # bundlea el viewer en dist/
+npm run serve        # servidor estático en http://127.0.0.1:8123
 ```
 
-Then open:
+`http://127.0.0.1:8123` muestra un índice con links a todo:
 
-| URL | What |
+| URL | Qué es |
 |---|---|
-| `/src/builder/index.html` | the builder (add `?ejemplo=club-intimo` to preload an example) |
-| `/src/preview.html` | bare viewer (`?venue=../examples/rooftop.json`, `?theme=light`) |
-| `/src/demo/index.html` | fake ticketing checkout with a cart driven by viewer events |
-| `/scripts/e2e.html`, `/scripts/builder-e2e.html` | behavior self-checks (every line must PASS) |
+| `/src/builder/index.html` | el builder (`?ejemplo=club-intimo` precarga un ejemplo) |
+| `/src/preview.html` | viewer pelado (`?venue=../examples/rooftop.json`, `?theme=light`) |
+| `/src/demo/index.html` | checkout falso con carrito manejado por los eventos del viewer |
+| `/scripts/e2e.html`, `/scripts/builder-e2e.html` | self-checks de comportamiento (cada línea debe decir PASS) |
 
-Native ES modules — any static server works; `file://` does not.
+Módulos ES nativos — sirve cualquier servidor estático; `file://` no funciona.
 
-## Embedding the viewer
+## Embeber el viewer
 
-Copy `dist/venue-map.js` + `dist/venue-map.css` (and your `venue.json`) into any project.
-No framework, no dependencies, no network calls at runtime.
+Copiá `dist/venue-map.js` + `dist/venue-map.css` (y tu `venue.json`) a cualquier proyecto.
+Sin framework, sin dependencias, sin llamadas de red en runtime.
 
 ```html
 <link rel="stylesheet" href="venue-map.css">
@@ -39,92 +62,94 @@ No framework, no dependencies, no network calls at runtime.
   import { VenueMap } from './venue-map.js';
 
   const map = new VenueMap('#venue-map', {
-    url: './venue.json',     // or data: <inline object>
+    url: './venue.json',     // o data: <objeto inline>
     interactive: true,
     multiSelect: true,
   });
 
   map.on('select', ({ zone, tier, selected, selection }) => {
-    // drive your cart from here
+    // manejá tu carrito desde acá
   });
 </script>
 ```
 
-Give the container a height — the map fills it at any aspect ratio without distorting.
+Dale una altura al contenedor — el mapa lo llena en cualquier aspect ratio sin distorsionar.
 
-### Options
+### Opciones
 
-| option | default | notes |
+| opción | default | notas |
 |---|---|---|
-| `data` | — | venue JSON object (validated on load) |
-| `url` | — | fetch the venue JSON instead (`map.ready` resolves when loaded) |
-| `interactive` | `true` | `false` = static picture: no pan/zoom, hover, focus, or events |
-| `selectable` | `true` | allow selecting zones (forced off when not interactive) |
-| `multiSelect` | `false` | keep multiple zones selected |
-| `showLegend` | `true` | tier legend panel (bottom sheet on ≤640px screens) |
-| `showTooltips` | `true` | hover tooltip with label/tier/price/capacity/status |
-| `theme` | `'dark'` | `'dark'`, `'light'`, or an object of CSS-var overrides (`{ bg: '#000' }`) |
-| `locale` | `'es-CL'` | price formatting locale (currency comes from the data) |
-| `floor` | first floor | initial floor id |
-| `onSelect` / `onHover` | — | callback shorthands for the events below |
+| `data` | — | objeto JSON del venue (se valida al cargar) |
+| `url` | — | fetch del JSON (`map.ready` resuelve cuando cargó) |
+| `interactive` | `true` | `false` = imagen estática: sin pan/zoom, hover, foco ni eventos |
+| `selectable` | `true` | permite seleccionar zonas (forzado a off si no es interactivo) |
+| `multiSelect` | `false` | mantiene varias zonas seleccionadas |
+| `showLegend` | `true` | panel de leyenda de tiers (bottom sheet en pantallas ≤640px) |
+| `showTooltips` | `true` | tooltip al hover con label/tier/precio/capacidad/estado |
+| `theme` | `'dark'` | `'dark'`, `'light'`, o un objeto de overrides de variables CSS (`{ bg: '#000' }`) |
+| `locale` | `'es-CL'` | locale de formato de precios (la moneda viene del JSON) |
+| `floor` | primer piso | id del piso inicial |
+| `onSelect` / `onHover` | — | atajos para los eventos de abajo |
 
-### Events (`map.on(event, fn)`)
+### Eventos (`map.on(evento, fn)`)
 
-- `select` → `{ zone, tier, selected, selection }` — fired on select *and* deselect
+- `select` → `{ zone, tier, selected, selection }` — dispara al seleccionar *y* deseleccionar
 - `hover` → `{ zone, tier }`
 - `floorchange` → `{ floor }`
 
-### Methods
+### Métodos
 
-`ready` (promise) · `on` / `off` · `select(id)` / `deselect(id)` / `getSelection()` ·
+`ready` (promesa) · `on` / `off` · `select(id)` / `deselect(id)` / `getSelection()` ·
 `highlightTier(tierId | null)` · `setStatus(id, 'available' | 'limited' | 'soldout' | 'reserved')` ·
-`setFloor(id)` · `destroy()`. The module also exports `validate(json)` / `formatErrors(errors)`.
+`setFloor(id)` · `destroy()`. El módulo también exporta `validate(json)` / `formatErrors(errors)`.
 
-`setStatus('vip-a', 'soldout')` mutes the zone, blocks selection, and — if it was selected —
-deselects it and fires `select` with `selected: false`, so a cart stays in sync for free.
+`setStatus('vip-a', 'soldout')` apaga la zona, bloquea la selección y — si estaba seleccionada —
+la deselecciona y dispara `select` con `selected: false`, así el carrito queda sincronizado gratis.
 
 ### Theming
 
-Everything visual hangs off `--vm-*` custom properties on `.vmap` (`bg`, `floor`, `wall`,
+Todo lo visual cuelga de custom properties `--vm-*` en `.vmap` (`bg`, `floor`, `wall`,
 `outline`, `text`, `muted`, `accent`, `focus`, `panel-bg`, `panel-border`, `tooltip-bg`,
-`tooltip-text`, `radius`, `soldout-mute`, `font`). Override them from host CSS, per-venue via
-`venue.theme` in the JSON, or per-instance via the `theme` option. Tier colors are data, not theme.
+`tooltip-text`, `radius`, `soldout-mute`, `font`). Sobrescribilas desde el CSS del host, por
+venue vía `venue.theme` en el JSON, o por instancia vía la opción `theme`. Los colores de los
+tiers son datos, no tema.
 
-## Hand-writing a venue
+## Escribir un venue a mano
 
-Read [`schema.md`](./schema.md) — the whole contract fits on one page. Start from the minimal
-example there, or crib from [`examples/`](./examples): `club-intimo.json` (small club,
-single-floor shorthand), `warehouse.json` (two floors, statuses), `rooftop.json` (VIP-table
-density, discount pricing). Load errors are human-readable and name the exact zone and fix.
+Leé [`schema.md`](./schema.md) — el contrato completo entra en una página. Partí del ejemplo
+mínimo de ahí, o copiá de [`examples/`](./examples): `club-intimo.json` (club chico, forma
+corta de un solo piso), `warehouse.json` (dos pisos, estados), `rooftop.json` (densidad de
+mesas VIP, precios con descuento). Los errores de carga son legibles y nombran la zona exacta
+y cómo arreglarla.
 
-## Decisions
+## Decisiones
 
-- **Vanilla JS + native ES modules, no framework.** The builder's complexity is geometry, not
-  UI state. The only tool is esbuild, bundling the viewer to one file; the builder runs
-  unbundled in the browser. Both share the same core modules (`src/core/`) — the builder canvas
-  and the viewer render zones through the exact same code, so "preview" fidelity is structural.
-- **Schema deviations from the original sketch** (details in `schema.md`): shape fields are
-  flattened onto the zone (no nested `shape: {}` object); currency lives on `venue`, not per
-  tier; paint order is fixed by zone type (no z-index); `path` shapes are a viewer-only escape
-  hatch (the builder preserves them but only `polygon` is drawable/editable).
-- **Tables sell as whole units** — `capacity` is informational. Per-seat selling would be a
-  schema v2 concern.
-- **Prices format via `Intl.NumberFormat`** — default `es-CL` + CLP (`$ 250.000`), locale
-  configurable per instance, currency per venue.
-- **Builder cuts, on purpose**: no z-order UI, no magnetic alignment guides (align/distribute
-  buttons instead), no group resize/rotate, no polygon midpoint insertion, no modals. Rotated
-  rects resize correctly (opposite corner stays pinned) via `core/geometry.js`.
+- **Vanilla JS + módulos ES nativos, sin framework.** La complejidad del builder es geometría,
+  no estado de UI. La única herramienta es esbuild, que bundlea el viewer a un archivo; el
+  builder corre sin bundlear en el browser. Ambos comparten los módulos de `src/core/` — el
+  canvas del builder y el viewer renderizan las zonas por el mismo código, así que la fidelidad
+  del "preview" es estructural.
+- **Desvíos del schema respecto al sketch original** (detalles en `schema.md`): los campos de
+  forma van planos sobre la zona (sin objeto `shape: {}` anidado); la moneda vive en `venue`,
+  no por tier; el orden de pintado lo fija el tipo de zona (sin z-index); las formas `path` son
+  un escape solo-viewer (el builder las preserva pero solo `polygon` se dibuja/edita).
+- **Las mesas se venden como unidad** — `capacity` es informativo. Venta por asiento sería un
+  tema de schema v2.
+- **Cortes deliberados del builder**: sin UI de z-order, sin guías magnéticas (botones de
+  alinear/distribuir en su lugar), sin resize/rotate grupal, sin inserción de puntos medios en
+  polígonos, sin modales. Los rects rotados se redimensionan bien (la esquina opuesta queda
+  fija) vía `core/geometry.js`.
 
-## Layout
+## Estructura
 
 ```
-schema.md                    the venue.json contract
-examples/                    three complete venues (also the schema's test fixtures)
-dist/                        the embeddable artifact: venue-map.js + venue-map.css
-src/core/                    shared: schema validation, geometry, SVG render, panzoom, money
-src/viewer/                  VenueMap + legend/tooltip/a11y + venue-map.css
-src/builder/                 the editor app
-src/demo/                    fake checkout embedding dist/
-scripts/check.mjs            node self-check (schema + geometry)
-scripts/*-e2e.html           browser behavior checks
+schema.md                    el contrato de venue.json
+examples/                    tres venues completos (también fixtures de test del schema)
+dist/                        el artefacto embebible: venue-map.js + venue-map.css
+src/core/                    compartido: validación, geometría, render SVG, panzoom, dinero
+src/viewer/                  VenueMap + leyenda/tooltip/a11y + venue-map.css
+src/builder/                 la app de edición
+src/demo/                    checkout falso embebiendo dist/
+scripts/check.mjs            self-check en node (schema + geometría)
+scripts/*-e2e.html           checks de comportamiento en browser
 ```
