@@ -1,5 +1,10 @@
 # mapa-discos 🪩
 
+![licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue)
+![dependencias: 0](https://img.shields.io/badge/dependencias_runtime-0-brightgreen)
+![vanilla JS](https://img.shields.io/badge/vanilla-JS-f7df1e)
+![schema v1.0](https://img.shields.io/badge/venue.json-v1.0-8a2be2)
+
 Mapas cenitales de discotecas y venues nocturnos: un **builder** visual para dibujar el layout
 del club con sus tiers de precio, y un **viewer** embebible, sin dependencias, para tu sitio de
 venta de entradas.
@@ -153,3 +158,7 @@ src/demo/                    checkout falso embebiendo dist/
 scripts/check.mjs            self-check en node (schema + geometría)
 scripts/*-e2e.html           checks de comportamiento en browser
 ```
+
+## Licencia
+
+[MIT](./LICENSE)
