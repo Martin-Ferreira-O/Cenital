@@ -1,0 +1,145 @@
+<!doctype html>
+<!-- Builder behavior self-check: boots the builder modules against a fixed-size canvas
+     and drives them with synthetic pointer events. Every line in <pre> must say PASS.
+     chrome --headless --dump-dom --virtual-time-budget=5000 http://127.0.0.1:8123/scripts/builder-e2e.html -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../src/viewer/venue-map.css">
+<link rel="stylesheet" href="../src/builder/builder.css">
+<style>#canvas { position: relative; width: 800px; height: 500px; }</style>
+</head>
+<body>
+<div id="canvas" class="bld-canvas vm-scope"></div>
+<pre id="out">did not run</pre>
+<script type="module">
+import { validate } from '../src/core/schema.js';
+import { createStore, blankDoc } from '../src/builder/store.js';
+import { createCanvas } from '../src/builder/canvas.js';
+import { createHandles } from '../src/builder/handles.js';
+import { createTools } from '../src/builder/tools.js';
+import { deleteSelection, duplicateSelection } from '../src/builder/inspector.js';
+
+const out = [];
+const t = (name, cond, extra = '') => out.push(`${cond ? 'PASS' : 'FAIL'} ${name}${cond ? '' : ` — ${extra}`}`);
+
+const store = createStore(blankDoc());
+const canvas = createCanvas(document.getElementById('canvas'), store);
+const handles = createHandles({ store, canvas });
+const tools = createTools({ store, canvas, handles });
+canvas.wire(tools, () => handles.refresh());
+store.subscribe((s) => { canvas.render(s); handles.refresh(); });
+store.setUI(() => {});
+await new Promise((r) => setTimeout(r, 50));
+
+const u2c = (ux, uy) => {
+  const rect = canvas.svg.getBoundingClientRect();
+  const vb = canvas.panzoom.viewBox();
+  const s = Math.min(rect.width / vb.w, rect.height / vb.h);
+  const ox = rect.left + (rect.width - vb.w * s) / 2;
+  const oy = rect.top + (rect.height - vb.h * s) / 2;
+  return [ox + (ux - vb.x) * s, oy + (uy - vb.y) * s];
+};
+const pev = (type, ux, uy, opts = {}, target = null) => {
+  const [clientX, clientY] = u2c(ux, uy);
+  // real hit-testing so events land on zones/handles like genuine pointer input
+  const el = target ?? document.elementFromPoint(clientX, clientY) ?? canvas.svg;
+  el.dispatchEvent(new PointerEvent(type, {
+    bubbles: true, clientX, clientY, pointerId: 1, button: 0, isPrimary: true, ...opts,
+  }));
+};
+const gesture = (a, b) => { pev('pointerdown', ...a); pev('pointermove', ...b); pev('pointerup', ...b); };
+const floor = () => store.floor();
+
+// draw a rect
+store.setUI((s) => { s.tool = 'rect'; });
+gesture([4, 4], [10, 8]);
+let z = floor().zones[0];
+t('rect tool creates zone', z && z.shape === 'rect' && z.x === 4 && z.y === 4 && z.w === 6 && z.h === 4, JSON.stringify(z));
+t('new zone selected + tool back to select', store.state.selection.join() === z.id && store.state.tool === 'select');
+
+// click empty deselects, click zone selects
+gesture([20, 14], [20, 14]);
+t('click empty clears selection', store.state.selection.length === 0);
+gesture([5, 5], [5, 5]);
+t('click zone selects it', store.state.selection.join() === z.id);
+
+// drag moves with snap, one undo entry
+gesture([5, 5], [7, 6]);
+z = floor().zones[0];
+t('drag moves zone (snapped)', z.x === 6 && z.y === 5, JSON.stringify(z));
+store.undo();
+t('move is one undo entry', floor().zones[0].x === 4);
+store.redo();
+
+// marquee select
+gesture([0.5, 0.5], [22, 15]);
+t('marquee selects zone', store.state.selection.length === 1);
+
+// duplicate + array behavior
+duplicateSelection(store);
+t('duplicate creates offset copy', floor().zones.length === 2 && floor().zones[1].x === 7);
+deleteSelection(store);
+t('delete removes selection', floor().zones.length === 1 && store.state.selection.length === 0);
+
+// circle + polygon + fixture tools
+store.setUI((s) => { s.tool = 'circle'; });
+gesture([14, 12], [16, 12]);
+z = floor().zones.at(-1);
+t('circle tool', z.shape === 'circle' && z.x === 14 && z.r === 2, JSON.stringify(z));
+
+store.setUI((s) => { s.tool = 'polygon'; });
+pev('pointerdown', 2, 10); pev('pointerup', 2, 10);
+pev('pointerdown', 6, 10); pev('pointerup', 6, 10);
+pev('pointerdown', 6, 13); pev('pointerup', 6, 13);
+pev('pointerdown', 2, 10); pev('pointerup', 2, 10); // close on first vertex
+z = floor().zones.at(-1);
+t('polygon tool closes on first vertex', z.shape === 'polygon' && z.points.length === 3, JSON.stringify(z));
+
+store.setUI((s) => { s.tool = 'fixture:bar'; });
+pev('pointerdown', 12, 2); pev('pointerup', 12, 2);
+z = floor().zones.at(-1);
+t('fixture preset placed centered', z.fixture === 'bar' && z.x === 9 && z.w === 6, JSON.stringify(z));
+
+// handle drag: resize the first rect via its SE corner
+store.setUI((s) => { s.tool = 'select'; s.selection = ['zona-1']; });
+const rz = store.zone('zona-1');
+const handleEl = canvas.handlesG.querySelector('[data-handle="resize:2"]');
+t('resize handle rendered', !!handleEl);
+pev('pointerdown', rz.x + rz.w, rz.y + rz.h, {}, handleEl);
+pev('pointermove', rz.x + rz.w + 2, rz.y + rz.h + 1);
+pev('pointerup', rz.x + rz.w + 2, rz.y + rz.h + 1);
+z = store.zone('zona-1');
+t('corner resize grows rect', z.w === 8 && z.h === 5, JSON.stringify(z));
+
+// rotate handle: snaps to 15°
+const rotEl = canvas.handlesG.querySelector('[data-handle="rotate"]');
+t('rotate handle rendered', !!rotEl);
+const cx = z.x + z.w / 2, cy = z.y + z.h / 2;
+pev('pointerdown', cx, z.y - 1, {}, rotEl);
+pev('pointermove', cx + 3, cy - 3);
+pev('pointerup', cx + 3, cy - 3);
+z = store.zone('zona-1');
+t('rotation applied with 15° snap', z.rotation > 0 && z.rotation % 15 === 0, String(z.rotation));
+
+// label tool
+store.setUI((s) => { s.tool = 'label'; });
+pev('pointerdown', 12, 14); pev('pointerup', 12, 14);
+const input = document.querySelector('.bld-label-input');
+t('label input appears', !!input);
+input.value = 'PISTA';
+input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+t('label committed', floor().labels?.at(-1)?.text === 'PISTA');
+
+// the builder can only ever produce valid documents
+t('doc remains schema-valid', validate(store.doc).ok);
+
+// undo all the way down survives
+let guard = 40;
+while (store.canUndo() && guard--) store.undo();
+t('undo to empty is safe', floor().zones.length === 0 && validate(store.doc).ok);
+
+document.getElementById('out').textContent = out.join('\n');
+</script>
+</body>
+</html>

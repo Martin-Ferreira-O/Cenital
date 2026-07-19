@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1.0",
+  "venue": {
+    "name": "Bodega Norte",
+    "city": "Santiago, CL",
+    "currency": "CLP",
+    "units": "m"
+  },
+  "tiers": [
+    {
+      "id": "general",
+      "label": "General",
+      "color": "#4a7dd6",
+      "price": 18000,
+      "fee": 3150
+    },
+    {
+      "id": "preferencial",
+      "label": "Preferencial",
+      "color": "#7c5ce0",
+      "price": 28000,
+      "fee": 4900,
+      "perks": ["Zona frente al escenario"]
+    },
+    {
+      "id": "mesa-mezz",
+      "label": "Mesa Mezzanine",
+      "color": "#c9a227",
+      "price": 180000,
+      "fee": 31500,
+      "perks": ["Vista al escenario", "2 botellas", "Mesero dedicado"]
+    }
+  ],
+  "floors": [
+    {
+      "id": "principal",
+      "label": "Principal",
+      "size": { "width": 40, "height": 26 },
+      "zones": [
+        { "id": "escenario", "label": "Escenario", "type": "fixture", "fixture": "stage",
+          "shape": "rect", "x": 14, "y": 0.8, "w": 12, "h": 3.5, "rx": 0.2 },
+        { "id": "muro-oeste", "type": "wall", "shape": "rect", "x": 0.5, "y": 5, "w": 7, "h": 0.25 },
+        { "id": "muro-este", "type": "wall", "shape": "rect", "x": 32.5, "y": 5, "w": 7, "h": 0.25 },
+
+        { "id": "preferencial-zona", "label": "Preferencial", "type": "area", "shape": "rect",
+          "x": 8, "y": 5.5, "w": 24, "h": 4, "tier": "preferencial", "capacity": 250, "status": "limited" },
+        { "id": "pista-general", "label": "Pista General", "type": "area", "shape": "rect",
+          "x": 8, "y": 9.5, "w": 24, "h": 9, "tier": "general", "capacity": 900 },
+
+        { "id": "escaleras-o", "label": "Escaleras", "type": "fixture", "fixture": "stairs",
+          "shape": "rect", "x": 1, "y": 1, "w": 3, "h": 4 },
+        { "id": "escaleras-e", "label": "Escaleras", "type": "fixture", "fixture": "stairs",
+          "shape": "rect", "x": 36, "y": 1, "w": 3, "h": 4 },
+
+        { "id": "barra-oeste", "label": "Barra Oeste", "type": "fixture", "fixture": "bar",
+          "shape": "rect", "x": 1, "y": 8, "w": 2, "h": 10, "rx": 0.15 },
+        { "id": "barra-este", "label": "Barra Este", "type": "fixture", "fixture": "bar",
+          "shape": "rect", "x": 37, "y": 8, "w": 2, "h": 10, "rx": 0.15 },
+
+        { "id": "pilar-1", "type": "fixture", "fixture": "pillar", "shape": "circle", "x": 12, "y": 12, "r": 0.4 },
+        { "id": "pilar-2", "type": "fixture", "fixture": "pillar", "shape": "circle", "x": 28, "y": 12, "r": 0.4 },
+        { "id": "pilar-3", "type": "fixture", "fixture": "pillar", "shape": "circle", "x": 12, "y": 18, "r": 0.4 },
+        { "id": "pilar-4", "type": "fixture", "fixture": "pillar", "shape": "circle", "x": 28, "y": 18, "r": 0.4 },
+
+        { "id": "cabina", "label": "Cabina", "type": "fixture", "fixture": "dj",
+          "shape": "rect", "x": 17, "y": 19.5, "w": 6, "h": 2.5, "rx": 0.2 },
+        { "id": "banos-p", "label": "Baños", "type": "fixture", "fixture": "restroom",
+          "shape": "rect", "x": 1, "y": 21.5, "w": 5, "h": 3.5 },
+        { "id": "guardarropia", "label": "Guardarropía", "type": "fixture",
+          "shape": "rect", "x": 24.5, "y": 22, "w": 5, "h": 3 },
+        { "id": "entrada", "label": "Entrada", "type": "fixture", "fixture": "entrance",
+          "shape": "rect", "x": 17, "y": 24.8, "w": 6, "h": 1.2 }
+      ],
+      "labels": [
+        { "text": "PISTA", "x": 20, "y": 14, "size": 1.1 }
+      ]
+    },
+    {
+      "id": "mezzanine",
+      "label": "Mezzanine",
+      "size": { "width": 40, "height": 12 },
+      "zones": [
+        { "id": "balcon", "label": "Balcón", "type": "area", "shape": "rect",
+          "x": 4, "y": 1, "w": 30, "h": 5 },
+        { "id": "baranda", "type": "wall", "shape": "rect", "x": 4, "y": 9.8, "w": 32, "h": 0.25 },
+        { "id": "barra-mezz", "label": "Barra Mezzanine", "type": "fixture", "fixture": "bar",
+          "shape": "rect", "x": 1, "y": 2, "w": 1.8, "h": 8, "rx": 0.15 },
+        { "id": "escaleras-m", "label": "Escaleras", "type": "fixture", "fixture": "stairs",
+          "shape": "rect", "x": 36.5, "y": 1, "w": 3, "h": 4 },
+
+        { "id": "mesa-m1", "label": "Mesa 1", "type": "table", "shape": "rect",
+          "x": 6, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6 },
+        { "id": "mesa-m2", "label": "Mesa 2", "type": "table", "shape": "rect",
+          "x": 9.5, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6 },
+        { "id": "mesa-m3", "label": "Mesa 3", "type": "table", "shape": "rect",
+          "x": 13, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6, "status": "soldout" },
+        { "id": "mesa-m4", "label": "Mesa 4", "type": "table", "shape": "rect",
+          "x": 16.5, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6 },
+        { "id": "mesa-m5", "label": "Mesa 5", "type": "table", "shape": "rect",
+          "x": 20, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6 },
+        { "id": "mesa-m6", "label": "Mesa 6", "type": "table", "shape": "rect",
+          "x": 23.5, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6, "status": "soldout" },
+        { "id": "mesa-m7", "label": "Mesa 7", "type": "table", "shape": "rect",
+          "x": 27, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6, "status": "reserved" },
+        { "id": "mesa-m8", "label": "Mesa 8", "type": "table", "shape": "rect",
+          "x": 30.5, "y": 6.5, "w": 2.4, "h": 2, "rx": 0.3, "tier": "mesa-mezz", "capacity": 6 }
+      ],
+      "labels": [
+        { "text": "BALCÓN", "x": 19, "y": 3.5, "size": 0.9 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,450 @@
+/* venue-map.css — all viewer styling. Theming via --vm-* custom properties on .vmap:
+   override them from the host app or per-venue via venue.theme. Tier colors are data
+   (per-zone --tier), not theme. */
+
+/* .vm-scope: hook for rendering venue SVG outside a full VenueMap (the builder canvas) —
+   it receives the same theme custom properties without the viewer's layout styles. */
+.vmap, .vm-scope {
+  /* dark theme (default) */
+  --vm-bg: #0a0a10;
+  --vm-floor: #14141f;
+  --vm-wall: #2c2c3f;
+  --vm-outline: #272740;
+  --vm-fixture: #191926;
+  --vm-fixture-line: #3a3a55;
+  --vm-text: #ece9e2;
+  --vm-muted: #8f8da0;
+  --vm-accent: #c9a227;
+  --vm-focus: #ecd98d;
+  --vm-panel-bg: #0d0d15;
+  --vm-panel-border: #20202f;
+  --vm-tooltip-bg: #181824;
+  --vm-tooltip-text: #ece9e2;
+  --vm-radius: 14px;
+  --vm-soldout-mute: 0.38;
+  --vm-font: 'Inter', 'SF Pro Text', -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vmap {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--vm-bg);
+  color: var(--vm-text);
+  font-family: var(--vm-font);
+  border-radius: var(--vm-radius);
+}
+
+.vmap[data-vm-theme='light'] {
+  --vm-bg: #f4f3f0;
+  --vm-floor: #fdfcfa;
+  --vm-wall: #c6c4cf;
+  --vm-outline: #dedcd5;
+  --vm-fixture: #edecf1;
+  --vm-fixture-line: #b6b4c2;
+  --vm-text: #1d1c24;
+  --vm-muted: #767482;
+  --vm-focus: #8a6d0b;
+  --vm-panel-bg: #faf9f7;
+  --vm-panel-border: #e6e4de;
+  --vm-tooltip-bg: #1d1c24;
+  --vm-tooltip-text: #f4f3f0;
+}
+
+/* ---- stage ---- */
+
+.vmap-stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  background:
+    radial-gradient(90% 85% at 50% 42%,
+      color-mix(in srgb, var(--vm-floor) 45%, var(--vm-bg)),
+      var(--vm-bg) 78%);
+}
+
+.vmap-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.vm-slab {
+  fill: var(--vm-floor);
+  stroke: var(--vm-outline);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- zones ---- */
+
+.vm-zone .vm-shape {
+  fill: color-mix(in oklab, var(--tier, #6b6a7a) 26%, var(--vm-floor));
+  stroke: color-mix(in srgb, var(--tier, #6b6a7a) 70%, transparent);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+  transition: fill 150ms ease, filter 150ms ease, opacity 150ms ease;
+}
+
+.vm-zone[data-type='area'] .vm-shape {
+  fill: color-mix(in oklab, var(--tier, #6b6a7a) 15%, var(--vm-floor));
+  stroke: color-mix(in srgb, var(--tier, #6b6a7a) 45%, transparent);
+  animation: vm-pulse 7s ease-in-out infinite;
+}
+
+.vm-zone[data-type='wall'] .vm-shape {
+  fill: var(--vm-wall);
+  stroke: none;
+}
+
+.vm-zone[data-type='fixture'] .vm-shape {
+  fill: var(--vm-fixture);
+  stroke: var(--vm-fixture-line);
+  stroke-width: 1;
+}
+
+.vm-zone[data-fixture='pillar'] .vm-shape {
+  fill: var(--vm-fixture-line);
+  stroke: none;
+}
+
+@keyframes vm-pulse {
+  0%, 100% { fill-opacity: 1; }
+  50% { fill-opacity: 0.85; }
+}
+
+/* interaction states — all CSS, driven by data-* + classes */
+
+.vm-zone[data-interactive] { cursor: pointer; }
+
+.vm-zone[data-interactive]:hover .vm-shape,
+.vm-zone:focus-visible .vm-shape {
+  fill: color-mix(in oklab, var(--tier, #6b6a7a) 42%, var(--vm-floor));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--tier, #6b6a7a) 55%, transparent));
+}
+
+.vm-zone:focus-visible { outline: none; }
+.vm-zone:focus-visible .vm-shape {
+  stroke: var(--vm-focus);
+  stroke-width: 2.25;
+}
+
+.vm-zone.selected .vm-shape {
+  fill: color-mix(in oklab, var(--tier, #6b6a7a) 62%, var(--vm-floor));
+  stroke-width: 2.25;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--tier, #6b6a7a) 70%, transparent));
+}
+
+.vm-zone.selected .vm-zone-label { fill: var(--vm-text); }
+
+.vm-zone.dim { opacity: 0.22; }
+
+.vm-zone[data-status='limited'] .vm-shape {
+  stroke-dasharray: 0.35 0.18;
+}
+
+.vm-zone[data-status='reserved'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.vm-zone[data-status='soldout'] {
+  opacity: var(--vm-soldout-mute);
+  filter: grayscale(0.85);
+  pointer-events: none;
+}
+
+.vmap-static .vm-zone { pointer-events: none; cursor: default; }
+/* a static map must not swallow page scrolling on touch */
+.vmap-static .vmap-svg { touch-action: auto; }
+
+/* ---- svg text ---- */
+
+.vm-label {
+  fill: var(--vm-muted);
+  opacity: 0.75;
+  font-weight: 650;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.vm-zone-label {
+  fill: color-mix(in srgb, var(--tier, var(--vm-muted)) 40%, var(--vm-text));
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.vm-glyph { pointer-events: none; }
+.vm-glyph path {
+  stroke: var(--vm-muted);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.vm-glyph text {
+  fill: var(--vm-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+}
+
+/* ---- legend ---- */
+
+.vmap-legend {
+  width: 272px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 20px;
+  background: var(--vm-panel-bg);
+  border-left: 1px solid var(--vm-panel-border);
+  overflow-y: auto;
+}
+
+.vmap-legend-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.vmap-legend-sub {
+  margin: 4px 0 0;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vm-muted);
+}
+
+.vmap-tiers { display: flex; flex-direction: column; }
+
+.vmap-tier-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 11px;
+  align-items: start;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--vm-panel-border);
+  padding: 12px 2px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 150ms ease;
+}
+
+.vmap-tier-row:hover { background: color-mix(in srgb, var(--tier) 5%, transparent); }
+.vmap-tier-row.active { background: color-mix(in srgb, var(--tier) 9%, transparent); }
+.vmap-tier-row:hover .vmap-tier-name,
+.vmap-tier-row.active .vmap-tier-name { color: var(--vm-text); }
+.vmap-tier-row.active .vmap-swatch {
+  box-shadow: 0 0 0 1.5px var(--tier), 0 0 8px color-mix(in srgb, var(--tier) 60%, transparent);
+}
+
+.vmap-swatch {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--tier) 35%, var(--vm-floor));
+  box-shadow: 0 0 0 1.25px var(--tier);
+}
+
+.vmap-tier-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.vmap-tier-name {
+  font-size: 12.5px;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  color: var(--vm-muted);
+  transition: color 150ms ease;
+}
+
+.vmap-breakdown {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--vm-muted);
+  opacity: 0.8;
+}
+
+.vmap-perks {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  color: var(--vm-muted);
+  opacity: 0.65;
+}
+
+.vmap-tier-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vmap-final { font-size: 13px; font-weight: 700; color: var(--vm-text); }
+.vmap-was { font-size: 10.5px; color: var(--vm-muted); }
+
+/* ---- floor switcher ---- */
+
+.vmap-floors {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.vmap-floors button {
+  appearance: none;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vm-muted);
+  background: color-mix(in srgb, var(--vm-panel-bg) 82%, transparent);
+  border: 1px solid var(--vm-panel-border);
+  border-radius: 999px;
+  padding: 6px 13px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.vmap-floors button:hover { color: var(--vm-text); }
+.vmap-floors button.active { color: var(--vm-text); border-color: var(--vm-accent); }
+
+/* ---- tooltip ---- */
+
+.vmap-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  max-width: 240px;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: var(--vm-tooltip-bg);
+  color: var(--vm-tooltip-text);
+  border: 1px solid var(--vm-panel-border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  font-size: 11.5px;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 130ms ease;
+  z-index: 3;
+}
+
+.vmap-tooltip.show { opacity: 1; }
+
+.vmap-tooltip-title {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.vmap-tooltip-perks { opacity: 0.65; font-size: 10.5px; }
+
+.vmap-tooltip-status {
+  margin-top: 3px;
+  font-size: 10.5px;
+  opacity: 0.85;
+}
+
+.vmap-tooltip-status.status-limited { color: #e0b04b; }
+.vmap-tooltip-status.status-soldout { color: #e5716f; }
+.vmap-tooltip-status.status-reserved { color: var(--vm-muted); }
+
+/* ---- screen-reader-only content ---- */
+
+.vmap-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- error panel ---- */
+
+.vmap-error {
+  display: block;
+  padding: 24px;
+  overflow: auto;
+}
+
+.vmap-error h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e5716f;
+}
+
+.vmap-error pre {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: var(--vm-muted);
+}
+
+/* ---- mobile: legend collapses into a bottom sheet ---- */
+
+@media (max-width: 640px) {
+  .vmap-legend {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 55%;
+    border-left: none;
+    border-top: 1px solid var(--vm-panel-border);
+    border-radius: var(--vm-radius) var(--vm-radius) 0 0;
+    transform: translateY(calc(100% - 52px));
+    transition: transform 200ms ease;
+  }
+
+  .vmap-legend.open { transform: translateY(0); }
+
+  .vmap-legend-head { cursor: pointer; }
+  .vmap-legend-head::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--vm-panel-border);
+    margin: 0 auto 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vmap *, .vmap { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pase·CL — Noche Ámbar en Bodega Norte</title>
+<link rel="stylesheet" href="../../dist/venue-map.css">
+<link rel="stylesheet" href="./demo.css">
+</head>
+<body>
+<header class="site-head">
+  <span class="brand">PASE·CL</span>
+  <span class="head-note">checkout ficticio — demo del viewer embebido</span>
+</header>
+
+<section class="event-head">
+  <h1>Noche Ámbar</h1>
+  <p>Bodega Norte · Santiago · Sáb 15 Ago · 23:00 hrs</p>
+</section>
+
+<main class="layout">
+  <div id="map" class="map-slot"></div>
+
+  <aside class="cart">
+    <h2>Tu selección</h2>
+    <ul id="cart-items" class="cart-items"></ul>
+    <p id="cart-empty" class="cart-empty">Elige una zona o mesa en el mapa.</p>
+    <div class="cart-total">
+      <span>Total</span>
+      <strong id="cart-total">$0</strong>
+    </div>
+    <button id="checkout" class="cta" disabled>Continuar al pago</button>
+    <p class="fine">Los precios incluyen el cargo por servicio.</p>
+    <button id="sellout" class="demo-btn" type="button">Demo API: agotar Mesa 5</button>
+  </aside>
+</main>
+
+<script type="module" src="./demo.js"></script>
+</body>
+</html>

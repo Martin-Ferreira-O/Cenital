@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- Viewer behavior self-check against the built dist bundle.
+     Serve the repo root (npm run serve), open /scripts/e2e.html — or headless:
+     chrome --headless --dump-dom --virtual-time-budget=4000 http://127.0.0.1:8123/scripts/e2e.html
+     Every line in <pre> must say PASS. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../dist/venue-map.css">
+<style>#map, #map2, #map3 { width: 900px; height: 500px; }</style>
+</head>
+<body>
+<div id="map"></div><div id="map2"></div><div id="map3"></div>
+<pre id="out">did not run</pre>
+<script type="module">
+import { VenueMap } from '../dist/venue-map.js';
+const out = [];
+const t = (name, cond) => out.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
+
+const map = new VenueMap('#map', { url: '../examples/warehouse.json', multiSelect: true });
+await map.ready;
+const events = [];
+map.on('select', (e) => events.push(e));
+
+map.setFloor('mezzanine');
+const g = document.querySelector('[data-zone-id="mesa-m1"]');
+t('zone rendered after setFloor', !!g);
+g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+t('click selects + event payload', events.length === 1 && events[0].selected
+  && events[0].zone.id === 'mesa-m1' && events[0].tier.price === 180000);
+t('selection tracked', map.getSelection().join() === 'mesa-m1');
+
+map.select('mesa-m2');
+t('multiSelect keeps both', map.getSelection().length === 2);
+map.select('mesa-m3');
+t('soldout not selectable', !map.getSelection().includes('mesa-m3'));
+map.select('mesa-m7'); // reserved
+t('reserved not selectable (keyboard/API parity)', !map.getSelection().includes('mesa-m7'));
+t('reserved not focusable', !document.querySelector('[data-zone-id="mesa-m7"]').hasAttribute('tabindex'));
+map.setStatus('mesa-m1', 'soldout');
+t('setStatus soldout deselects', !map.getSelection().includes('mesa-m1'));
+t('soldout attribute applied', g.getAttribute('data-status') === 'soldout');
+
+const g2 = document.querySelector('[data-zone-id="mesa-m4"]');
+g2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+t('Enter selects', map.getSelection().includes('mesa-m4'));
+t('aria-pressed reflects selection', g2.getAttribute('aria-pressed') === 'true');
+t('zone is a focusable button', g2.getAttribute('tabindex') === '0' && g2.getAttribute('role') === 'button');
+
+t('floor switcher has 2 floors', document.querySelectorAll('.vmap-floors button').length === 2);
+t('legend has 3 tier rows', document.querySelectorAll('#map .vmap-tier-row').length === 3);
+document.querySelector('.vmap-tier-row[data-tier="mesa-mezz"]').click();
+t('legend click dims other tiers', document.querySelectorAll('#map .vm-zone.dim').length > 0);
+t('screen-reader list present', document.querySelectorAll('#map .vmap-sr li').length > 0);
+
+const map2 = new VenueMap('#map2', { url: '../examples/club-intimo.json', interactive: false });
+await map2.ready;
+t('static map exposes no focusables', document.querySelectorAll('#map2 [tabindex]').length === 0);
+map2.destroy();
+t('destroy removes DOM', document.querySelector('#map2 .vmap') === null);
+
+let rejected = false;
+try {
+  await new VenueMap('#map3', { data: { schemaVersion: '1.0' } }).ready;
+} catch { rejected = true; }
+t('invalid data rejects ready', rejected);
+t('invalid data renders error panel', !!document.querySelector('#map3 .vmap-error'));
+
+// destroy before ready (url path) must not append a zombie map afterwards
+document.querySelector('#map3 .vmap-error').remove();
+const zombie = new VenueMap('#map3', { url: '../examples/rooftop.json' });
+zombie.destroy();
+await zombie.ready;
+await new Promise((r) => setTimeout(r, 100));
+t('destroy before ready leaves no zombie DOM', document.querySelector('#map3 .vmap') === null);
+
+document.getElementById('out').textContent = out.join('\n');
+</script>
+</body>
+</html>

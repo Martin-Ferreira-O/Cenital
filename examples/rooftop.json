@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1.0",
+  "venue": {
+    "name": "Terraza Cielo",
+    "city": "Santiago, CL",
+    "currency": "CLP",
+    "units": "m"
+  },
+  "size": { "width": 30, "height": 20 },
+  "tiers": [
+    {
+      "id": "lounge",
+      "label": "Lounge General",
+      "color": "#5b7fdb",
+      "price": 22000,
+      "fee": 3850,
+      "originalPrice": 28000
+    },
+    {
+      "id": "vip",
+      "label": "Mesa VIP",
+      "color": "#c9a227",
+      "price": 160000,
+      "fee": 28000,
+      "originalPrice": 200000,
+      "perks": ["Servicio de botella", "Mesero dedicado"]
+    },
+    {
+      "id": "cabana",
+      "label": "Cabaña Premium",
+      "color": "#8b5cf6",
+      "price": 320000,
+      "fee": 56000,
+      "perks": ["Cabaña privada", "3 botellas", "Anfitrión"]
+    }
+  ],
+  "zones": [
+    { "id": "dj", "label": "DJ", "type": "fixture", "fixture": "dj",
+      "shape": "rect", "x": 1, "y": 1, "w": 4, "h": 2.5, "rx": 0.2 },
+
+    { "id": "cabana-1", "label": "Cabaña 1", "type": "table", "shape": "rect",
+      "x": 6.5, "y": 1, "w": 3.2, "h": 2.6, "rx": 0.4, "tier": "cabana", "capacity": 10 },
+    { "id": "cabana-2", "label": "Cabaña 2", "type": "table", "shape": "rect",
+      "x": 10.7, "y": 1, "w": 3.2, "h": 2.6, "rx": 0.4, "tier": "cabana", "capacity": 10 },
+    { "id": "cabana-3", "label": "Cabaña 3", "type": "table", "shape": "rect",
+      "x": 14.9, "y": 1, "w": 3.2, "h": 2.6, "rx": 0.4, "tier": "cabana", "capacity": 10, "status": "soldout" },
+    { "id": "cabana-4", "label": "Cabaña 4", "type": "table", "shape": "rect",
+      "x": 19.1, "y": 1, "w": 3.2, "h": 2.6, "rx": 0.4, "tier": "cabana", "capacity": 10 },
+    { "id": "cabana-5", "label": "Cabaña 5", "type": "table", "shape": "rect",
+      "x": 23.3, "y": 1, "w": 3.2, "h": 2.6, "rx": 0.4, "tier": "cabana", "capacity": 10, "status": "reserved" },
+
+    { "id": "mesa-1", "label": "Mesa 1", "type": "table", "shape": "rect",
+      "x": 5, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-2", "label": "Mesa 2", "type": "table", "shape": "rect",
+      "x": 8, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6, "status": "limited" },
+    { "id": "mesa-3", "label": "Mesa 3", "type": "table", "shape": "rect",
+      "x": 11, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-4", "label": "Mesa 4", "type": "table", "shape": "rect",
+      "x": 14, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-5", "label": "Mesa 5", "type": "table", "shape": "rect",
+      "x": 17, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-6", "label": "Mesa 6", "type": "table", "shape": "rect",
+      "x": 20, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-7", "label": "Mesa 7", "type": "table", "shape": "rect",
+      "x": 23, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-8", "label": "Mesa 8", "type": "table", "shape": "rect",
+      "x": 26, "y": 5.8, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6, "status": "soldout" },
+
+    { "id": "barra", "label": "Barra", "type": "fixture", "fixture": "bar",
+      "shape": "rect", "x": 11, "y": 8.5, "w": 8, "h": 2, "rx": 0.6 },
+
+    { "id": "mesa-9", "label": "Mesa 9", "type": "table", "shape": "rect",
+      "x": 11.5, "y": 12.5, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-10", "label": "Mesa 10", "type": "table", "shape": "rect",
+      "x": 14.5, "y": 12.5, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+    { "id": "mesa-11", "label": "Mesa 11", "type": "table", "shape": "rect",
+      "x": 17.5, "y": 12.5, "w": 2, "h": 1.8, "rx": 0.3, "tier": "vip", "capacity": 6 },
+
+    { "id": "lounge-zona", "label": "Lounge", "type": "area", "shape": "rect",
+      "x": 1, "y": 11, "w": 9, "h": 6, "tier": "lounge", "capacity": 90 },
+
+    { "id": "piscina", "label": "Piscina", "type": "fixture", "shape": "rect",
+      "x": 22, "y": 13, "w": 6.5, "h": 5.5, "rx": 1.2 },
+
+    { "id": "banos", "label": "Baños", "type": "fixture", "fixture": "restroom",
+      "shape": "rect", "x": 1, "y": 17.7, "w": 3, "h": 1.9 },
+    { "id": "acceso", "label": "Acceso", "type": "fixture", "fixture": "stairs",
+      "shape": "rect", "x": 14, "y": 17.8, "w": 3, "h": 1.8 }
+  ],
+  "labels": [
+    { "text": "LOUNGE", "x": 5.5, "y": 14, "size": 0.7 }
+  ]
+}

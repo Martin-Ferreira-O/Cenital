@@ -1,0 +1,13 @@
+{
+  "name": "mapa-discos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/viewer/index.js --bundle --format=esm --minify --outfile=dist/venue-map.js && cp src/viewer/venue-map.css dist/venue-map.css",
+    "check": "node scripts/check.mjs",
+    "serve": "python3 -m http.server 8123"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

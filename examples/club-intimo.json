@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "venue": {
+    "name": "Club Íntimo",
+    "city": "Santiago, CL",
+    "currency": "CLP",
+    "units": "m"
+  },
+  "size": { "width": 24, "height": 16 },
+  "tiers": [
+    {
+      "id": "general",
+      "label": "Entrada General",
+      "color": "#5b7fdb",
+      "price": 12000,
+      "fee": 2100
+    },
+    {
+      "id": "booth",
+      "label": "Booth",
+      "color": "#8b5cf6",
+      "price": 90000,
+      "fee": 15750,
+      "perks": ["Mesa reservada", "2 botellas de espumante"]
+    },
+    {
+      "id": "vip",
+      "label": "Mesa VIP",
+      "color": "#c9a227",
+      "price": 140000,
+      "fee": 24500,
+      "perks": ["Servicio de botella", "Anfitrión privado", "Ingreso preferente"]
+    }
+  ],
+  "zones": [
+    { "id": "dancefloor", "label": "Pista", "type": "area", "shape": "rect",
+      "x": 6, "y": 3.4, "w": 12, "h": 8.2, "tier": "general", "capacity": 150 },
+
+    { "id": "dj", "label": "DJ", "type": "fixture", "fixture": "dj", "shape": "rect",
+      "x": 9.5, "y": 0.6, "w": 5, "h": 2, "rx": 0.2 },
+
+    { "id": "barra", "label": "Barra", "type": "fixture", "fixture": "bar", "shape": "rect",
+      "x": 0.7, "y": 4.5, "w": 1.6, "h": 7, "rx": 0.15 },
+
+    { "id": "vip-1", "label": "VIP 1", "type": "table", "shape": "rect",
+      "x": 6.4, "y": 0.9, "w": 2.2, "h": 1.8, "rx": 0.25, "tier": "vip", "capacity": 8 },
+    { "id": "vip-2", "label": "VIP 2", "type": "table", "shape": "rect",
+      "x": 15.4, "y": 0.9, "w": 2.2, "h": 1.8, "rx": 0.25, "tier": "vip", "capacity": 8 },
+
+    { "id": "booth-1", "label": "Booth 1", "type": "table", "shape": "rect",
+      "x": 20.6, "y": 3.6, "w": 2.6, "h": 2.4, "rx": 0.3, "tier": "booth", "capacity": 6 },
+    { "id": "booth-2", "label": "Booth 2", "type": "table", "shape": "rect",
+      "x": 20.6, "y": 6.8, "w": 2.6, "h": 2.4, "rx": 0.3, "tier": "booth", "capacity": 6 },
+    { "id": "booth-3", "label": "Booth 3", "type": "table", "shape": "rect",
+      "x": 20.6, "y": 10, "w": 2.6, "h": 2.4, "rx": 0.3, "tier": "booth", "capacity": 6 },
+
+    { "id": "pilar-1", "type": "fixture", "fixture": "pillar", "shape": "circle",
+      "x": 8, "y": 7.5, "r": 0.35 },
+    { "id": "pilar-2", "type": "fixture", "fixture": "pillar", "shape": "circle",
+      "x": 16, "y": 7.5, "r": 0.35 },
+
+    { "id": "muro-banos", "type": "wall", "shape": "rect",
+      "x": 0.4, "y": 12.2, "w": 4.4, "h": 0.2 },
+    { "id": "banos", "label": "Baños", "type": "fixture", "fixture": "restroom", "shape": "rect",
+      "x": 0.7, "y": 12.9, "w": 3.4, "h": 2.4 },
+
+    { "id": "entrada", "label": "Entrada", "type": "fixture", "fixture": "entrance", "shape": "rect",
+      "x": 10.4, "y": 14.9, "w": 3.2, "h": 1 }
+  ],
+  "labels": [
+    { "text": "PISTA", "x": 12, "y": 7.6, "size": 0.9 }
+  ]
+}
