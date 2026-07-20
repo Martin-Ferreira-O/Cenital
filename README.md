@@ -1,4 +1,4 @@
-# mapa-discos 🪩
+# Cenital 🪩
 
 ![licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue)
 ![dependencias: 0](https://img.shields.io/badge/dependencias_runtime-0-brightgreen)

@@ -5,7 +5,7 @@
 import { validate } from '../core/schema.js';
 import { shiftZone } from '../core/geometry.js';
 
-const AUTOSAVE_KEY = 'mapa-discos:doc';
+const AUTOSAVE_KEY = 'cenital:doc';
 
 export function blankDoc() {
   return {
