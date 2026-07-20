@@ -8,14 +8,23 @@
 <link rel="stylesheet" href="./builder.css">
 </head>
 <body>
-<header id="toolbar" class="bld-toolbar"></header>
+<header id="header" class="bld-header"></header>
 <div id="banner" class="bld-banner" hidden></div>
 <main class="bld-main">
-  <div id="canvas" class="bld-canvas vm-scope"></div>
-  <div id="preview" class="bld-preview"></div>
+  <nav id="rail" class="bld-rail"></nav>
+  <div class="bld-stage">
+    <div id="preview-note" class="bld-preview-note">Así verá el mapa el público en tu sitio — con leyenda, tooltips y pan/zoom.</div>
+    <div class="bld-stage-body">
+      <div id="canvas" class="bld-canvas vm-scope"></div>
+      <div id="preview" class="bld-preview"></div>
+      <div id="empty-card"></div>
+    </div>
+    <div class="bld-statusbar"><span id="status-l"></span><span id="status-r"></span></div>
+  </div>
   <aside class="bld-side">
-    <div id="inspector" class="bld-section"></div>
-    <div id="tiers" class="bld-section"></div>
+    <div id="steps" class="bld-steps"></div>
+    <div id="inspector" class="bld-panel"></div>
+    <div id="tiers" class="bld-panel" hidden></div>
   </aside>
 </main>
 <script type="module" src="./app.js"></script>

@@ -38,6 +38,7 @@ export function createStore(initialDoc) {
     tool: 'select',
     selection: [],       // zone ids, or a single 'label:<index>'
     grid: { size: 0.5, snap: true },
+    panel: 'draw',    // right-panel step: 'draw' | 'tiers'
     preview: false,
   };
   const undoStack = [];

@@ -1,6 +1,4 @@
-// Top toolbar: tools, floor tabs, grid, undo/redo, file actions, preview toggle.
-
-import { FIXTURES } from '../core/schema.js';
+// Top header: brand, venue identity, floor tabs, undo/redo, file actions, preview.
 
 function el(tag, cls, parent, text) {
   const n = document.createElement(tag);
@@ -10,69 +8,44 @@ function el(tag, cls, parent, text) {
   return n;
 }
 
-const TOOLS = [
-  ['select', 'V', 'Seleccionar (V)'],
-  ['rect', 'R', 'Rectángulo (R)'],
-  ['circle', 'C', 'Círculo (C)'],
-  ['polygon', 'P', 'Polígono (P)'],
-  ['label', 'T', 'Texto (T)'],
-];
-
 export function createToolbar(root, store, actions) {
-  const toolBtns = new Map();
+  // brand + venue identity
+  const brand = el('div', 'bld-brand', root);
+  el('span', 'bld-brand-dot', brand);
+  el('span', 'bld-brand-name', brand, 'CENITAL');
+  el('div', 'bld-hdr-div', root);
 
-  const left = el('div', 'bld-tb-group', root);
-  for (const [name, key, title] of TOOLS) {
-    const b = el('button', 'bld-tool', left, key);
-    b.title = title;
-    b.addEventListener('click', () => store.setUI((s) => { s.tool = name; }));
-    toolBtns.set(name, b);
-  }
-  const fixtureSel = el('select', 'bld-tool bld-fixture-sel', left);
-  el('option', null, fixtureSel, 'Fijos…').value = '';
-  for (const f of FIXTURES) el('option', null, fixtureSel, f).value = f;
-  fixtureSel.title = 'Colocar elemento fijo (barra, DJ, escenario…)';
-  fixtureSel.addEventListener('change', () => {
-    if (fixtureSel.value) store.setUI((s) => { s.tool = `fixture:${fixtureSel.value}`; });
+  const idBox = el('div', 'bld-venue-id', root);
+  const nameInput = el('input', 'bld-venue-name', idBox);
+  nameInput.title = 'Nombre del venue';
+  nameInput.addEventListener('change', () => {
+    const t = nameInput.value.trim();
+    if (t) store.update((s) => { s.doc.venue.name = t; });
+    else nameInput.value = store.doc.venue.name;
   });
+  const metaRow = el('div', 'bld-venue-meta', idBox);
+  const cityInput = el('input', 'bld-venue-city', metaRow);
+  cityInput.placeholder = 'Ciudad';
+  cityInput.title = 'Ciudad';
+  cityInput.addEventListener('change', () => store.update((s) => { s.doc.venue.city = cityInput.value.trim(); }));
+  const sizeSpan = el('span', null, metaRow);
 
-  const floorsBox = el('div', 'bld-tb-group bld-floors', root);
+  const floorsBox = el('div', 'bld-floors', root);
 
-  const right = el('div', 'bld-tb-group bld-tb-right', root);
-  const snapLabel = el('label', 'bld-snap', right);
-  const snapCheck = el('input', null, snapLabel);
-  snapCheck.type = 'checkbox';
-  el('span', null, snapLabel, 'Grilla');
-  const gridSize = el('input', 'bld-gridsize', right);
-  gridSize.type = 'number';
-  gridSize.step = 0.25;
-  gridSize.min = 0.1;
-  gridSize.title = 'Tamaño de grilla (m)';
-  snapCheck.addEventListener('change', () => store.setUI((s) => { s.grid.snap = snapCheck.checked; }));
-  gridSize.addEventListener('change', () => {
-    const v = parseFloat(gridSize.value);
-    if (v > 0) store.setUI((s) => { s.grid.size = v; });
-  });
+  const right = el('div', 'bld-hdr-right', root);
+  el('span', 'bld-saved', right, 'Guardado ✓');
 
-  const undoBtn = el('button', 'bld-tool', right, '↩');
+  const editGroup = el('div', 'bld-hdr-group', right);
+  const undoBtn = el('button', 'bld-icon-btn', editGroup, '↩');
   undoBtn.title = 'Deshacer (⌘Z)';
   undoBtn.addEventListener('click', () => store.undo());
-  const redoBtn = el('button', 'bld-tool', right, '↪');
+  const redoBtn = el('button', 'bld-icon-btn', editGroup, '↪');
   redoBtn.title = 'Rehacer (⇧⌘Z)';
   redoBtn.addEventListener('click', () => store.redo());
+  el('div', 'bld-hdr-div', editGroup);
 
-  const exampleSel = el('select', 'bld-tool', right);
-  el('option', null, exampleSel, 'Ejemplos…').value = '';
-  for (const [v, t] of [['club-intimo', 'Club Íntimo'], ['warehouse', 'Bodega Norte'], ['rooftop', 'Terraza Cielo']]) {
-    el('option', null, exampleSel, t).value = v;
-  }
-  exampleSel.addEventListener('change', () => {
-    if (exampleSel.value) actions.loadExample(exampleSel.value);
-    exampleSel.value = '';
-  });
-
-  const importBtn = el('button', 'bld-tool', right, 'Importar');
-  const fileInput = el('input', null, right);
+  const importBtn = el('button', 'bld-hdr-btn', editGroup, 'Importar');
+  const fileInput = el('input', null, editGroup);
   fileInput.type = 'file';
   fileInput.accept = '.json,application/json';
   fileInput.hidden = true;
@@ -82,24 +55,28 @@ export function createToolbar(root, store, actions) {
     fileInput.value = '';
   });
 
-  el('button', 'bld-tool', right, 'Exportar').addEventListener('click', actions.exportDoc);
-  const embedBtn = el('button', 'bld-tool', right, 'Embed');
-  embedBtn.title = 'Copiar snippet para embeber';
-  embedBtn.addEventListener('click', async () => {
-    await actions.copyEmbed();
-    const old = embedBtn.textContent;
-    embedBtn.textContent = 'Copiado ✓';
-    setTimeout(() => { embedBtn.textContent = old; }, 1200);
+  const exampleSel = el('select', 'bld-hdr-btn', editGroup);
+  el('option', null, exampleSel, 'Ejemplos ▾').value = '';
+  for (const [v, t] of [['club-intimo', 'Club Íntimo'], ['warehouse', 'Bodega Norte'], ['rooftop', 'Terraza Cielo']]) {
+    el('option', null, exampleSel, t).value = v;
+  }
+  exampleSel.addEventListener('change', () => {
+    if (exampleSel.value) actions.loadExample(exampleSel.value);
+    exampleSel.value = '';
   });
 
-  const previewBtn = el('button', 'bld-tool bld-preview-btn', right, 'Vista previa');
-  previewBtn.addEventListener('click', () => store.setUI((s) => { s.preview = !s.preview; }));
+  el('button', 'bld-hdr-btn', editGroup, 'Exportar').addEventListener('click', actions.exportDoc);
+  const previewBtn = el('button', 'bld-gold-btn', editGroup, '▶ Vista previa');
+  previewBtn.addEventListener('click', () => store.setUI((s) => { s.preview = true; }));
+
+  const backBtn = el('button', 'bld-gold-btn', right, '← Volver a editar');
+  backBtn.addEventListener('click', () => store.setUI((s) => { s.preview = false; }));
 
   function sync(state) {
-    const toolName = state.tool.split(':')[0];
-    for (const [name, b] of toolBtns) b.classList.toggle('active', name === toolName);
-    fixtureSel.classList.toggle('active', toolName === 'fixture');
-    if (toolName !== 'fixture') fixtureSel.value = '';
+    if (document.activeElement !== nameInput) nameInput.value = state.doc.venue.name;
+    if (document.activeElement !== cityInput) cityInput.value = state.doc.venue.city ?? '';
+    const { width, height } = store.floor().size;
+    sizeSpan.textContent = `· ${width} × ${height} m`;
 
     floorsBox.replaceChildren();
     for (const floor of state.doc.floors) {
@@ -119,12 +96,11 @@ export function createToolbar(root, store, actions) {
       });
     });
 
-    snapCheck.checked = state.grid.snap;
-    if (document.activeElement !== gridSize) gridSize.value = state.grid.size;
     undoBtn.disabled = !store.canUndo();
     redoBtn.disabled = !store.canRedo();
-    previewBtn.classList.toggle('active', state.preview);
-    previewBtn.textContent = state.preview ? 'Volver a editar' : 'Vista previa';
+    editGroup.hidden = state.preview;
+    floorsBox.hidden = state.preview;
+    backBtn.hidden = !state.preview;
   }
 
   return { sync };
